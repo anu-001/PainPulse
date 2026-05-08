@@ -1,0 +1,38 @@
+version: 2
+
+sources:
+  - name: analytics
+    schema: public   # or whatever schema your tables are in
+    tables:
+      - name: reddit_raw_posts
+      - name: pattern_config
+      - name: reddit_post_enrichment
+
+models:
+  - name: stg_reddit_posts
+    description: "Staging model for raw Reddit posts, cleaned and typed."
+    columns:
+      - name: post_id
+        description: "Reddit post ID (primary key)."
+        tests:
+          - not_null
+          - unique
+      - name: subreddit
+        tests:
+          - not_null
+      - name: title
+        tests:
+          - not_null
+      - name: created_at_utc
+        tests:
+          - not_null
+  - name: stg_reddit_posts_enriched
+    description: "Reddit posts with sentiment, engagement, and pain pattern flag."
+    columns:
+      - name: post_id
+        tests:
+          - not_null
+          - unique
+      - name: matches_pain_pattern
+        tests:
+          - not_null

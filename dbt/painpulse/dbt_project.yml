@@ -1,0 +1,23 @@
+name: "painpulse"
+version: "1.0.0"
+config-version: 2
+
+profile: "painpulse"
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  painpulse:
+    staging:
+      +materialized: view       # stg_reddit_posts, stg_reddit_posts_enriched
+    intermediate:
+      +materialized: table      # matched_pain_posts and later canonicalization
