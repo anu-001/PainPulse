@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "painpulse"
+version = "0.1.0"
+description = "ProblemPulse / PainPulse internal Reddit-based opportunity intelligence platform."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "psycopg2-binary>=2.9.9",
+    "requests>=2.32.0",
+    "scikit-learn>=1.5.0",
+    "numpy>=1.26.4",
+    "pandas>=2.2.2",
+]
