@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: pp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${PP_DB_NAME}
+      POSTGRES_USER: ${PP_DB_USER}
+      POSTGRES_PASSWORD: ${PP_DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  airflow:
+    image: apache/airflow:2.10.0-python3.11
+    container_name: pp-airflow
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR}
+      AIRFLOW__CORE__LOAD_EXAMPLES: ${AIRFLOW__CORE__LOAD_EXAMPLES}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${PP_DB_USER}:${PP_DB_PASSWORD}@postgres:5432/${PP_DB_NAME}
+      AIRFLOW__CORE__FERNET_KEY: "please-change-me-fernet-key"
+      AIRFLOW__WEBSERVER__RBAC: ${AIRFLOW__WEBSERVER__RBAC}
+      _PIP_ADDITIONAL_REQUIREMENTS: ""
+    volumes:
+      - ../airflow/dags:/opt/airflow/dags
+      - airflow_logs:/opt/airflow/logs
+    command: >
+      bash -c "
+      airflow db init &&
+      airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com &&
+      airflow webserver & airflow scheduler
+      "
+    ports:
+      - "8080:8080"
+
+  superset:
+    image: apache/superset:latest
+    container_name: pp-superset
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SUPERSET_LOAD_EXAMPLES: "no"
+      SUPERSET_DATABASE_URI: postgresql+psycopg2://${SUPERSET_DB_USER}:${SUPERSET_DB_PASSWORD}@postgres:5432/${SUPERSET_DB_NAME}
+    volumes:
+      - superset_home:/app/superset_home
+    ports:
+      - "8088:8088"
+
+  ingestion-service:
+    build:
+      context: ..
+      dockerfile: infra/ingestion.Dockerfile
+    container_name: pp-ingestion
+    depends_on:
+      - postgres
+    environment:
+      PP_DB_HOST: postgres
+      PP_DB_PORT: 5432
+      PP_DB_NAME: ${PP_DB_NAME}
+      PP_DB_USER: ${PP_DB_USER}
+      PP_DB_PASSWORD: ${PP_DB_PASSWORD}
+      REDDIT_TOKEN: ${REDDIT_TOKEN}
+    command: ["sleep", "infinity"]
+
+volumes:
+  pgdata:
+  airflow_logs:
+  superset_home:
