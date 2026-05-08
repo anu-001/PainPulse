@@ -17,3 +17,17 @@ CREATE TABLE IF NOT EXISTS reddit_raw_posts (
     created_utc BIGINT NOT NULL,
     ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS pattern_config (
+    id SERIAL PRIMARY KEY,
+    pattern TEXT NOT NULL,
+    description TEXT,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS reddit_post_enrichment (
+    post_id TEXT PRIMARY KEY,
+    sentiment_score DOUBLE PRECISION,
+    engagement_score DOUBLE PRECISION,
+    enriched_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
