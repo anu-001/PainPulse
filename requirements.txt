@@ -36,7 +36,6 @@ nltk==3.9.4
 numpy==1.26.4
 orderly-set==5.5.0
 packaging==26.2
--e git+ssh://git@github.com/anu-001/PainPulse.git@944a05346f0462a013f4b1a2dfe55af3093e8073#egg=painpulse
 pandas==2.2.2
 parsedatetime==2.6
 pathspec==0.12.1
