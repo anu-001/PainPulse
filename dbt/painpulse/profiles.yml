@@ -1,0 +1,15 @@
+painpulse:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: analytics_user
+      password: analytics_pass
+      port: 5432
+      dbname: analytics
+      schema: public
+      threads: 4
+      keepalives_idle: 0
+      connect_timeout: 10
+      sslmode: disable
