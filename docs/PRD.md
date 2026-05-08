@@ -4,7 +4,7 @@
 
 - **Product name:** ProblemPulse
 - **Document type:** Product Requirements Document (PRD)
-- **Owner:** <Your Name>
+- **Owner:** Anu
 - **Version:** v1.0
 - **Status:** Draft – V1 Internal Tool
 - **Last updated:** <YYYY‑MM‑DD>
