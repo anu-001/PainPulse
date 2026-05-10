@@ -1,0 +1,15 @@
+version: 2
+
+exposures:
+  - name: painpulse_pain_posts_dataset
+    label: PainPulse pain posts dataset
+    type: application
+    maturity: medium
+    url: https://github.com/anu-001/PainPulse
+    description: >
+      Consumer-facing dataset of ranked pain-related Reddit posts used by the PainPulse application.
+    depends_on:
+      - ref('fct_pain_posts')
+    owner:
+      name: Anu Apiti
+      email: you@example.com
