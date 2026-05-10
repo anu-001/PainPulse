@@ -12,4 +12,4 @@ exposures:
       - ref('fct_pain_posts')
     owner:
       name: Anu Apiti
-      email: you@example.com
+      email: n/a
