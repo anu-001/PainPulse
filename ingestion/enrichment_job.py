@@ -11,7 +11,6 @@ from ingestion.enrichment import compute_sentiment, compute_engagement
 def run_enrichment():
     """
     Enrich recent posts with sentiment and engagement scores into reddit_post_enrichment.
-
     This job is idempotent on post_id: UPSERTs enrichment rows.
     """
     lookback_hours = int(os.getenv("PP_ENRICH_LOOKBACK_HOURS", "24"))
@@ -24,7 +23,7 @@ def run_enrichment():
             cur.execute(
                 """
                 SELECT post_id, title, body, score, num_comments
-                FROM stg_reddit_posts
+                FROM public.stg_reddit_posts
                 WHERE created_utc >= %s
                 """,
                 (cutoff_unix,),
@@ -43,7 +42,7 @@ def run_enrichment():
                 execute_values(
                     cur,
                     """
-                    INSERT INTO reddit_post_enrichment (
+                    INSERT INTO public.reddit_post_enrichment (
                         post_id, sentiment_score, engagement_score
                     ) VALUES %s
                     ON CONFLICT (post_id) DO UPDATE SET

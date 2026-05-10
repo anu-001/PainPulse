@@ -1,0 +1,81 @@
+name: PainPulse Scheduled Pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    env:
+      PP_DB_HOST: localhost
+      PP_DB_PORT: 5432
+      PP_DB_NAME: analytics
+      PP_DB_USER: analytics_user
+      PP_DB_PASSWORD: analytics_pass
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: analytics_user
+          POSTGRES_PASSWORD: analytics_pass
+          POSTGRES_DB: analytics
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U analytics_user -d analytics"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -p 5432 -U analytics_user -d analytics; do
+            echo "Waiting for Postgres..."
+            sleep 2
+          done
+
+      - name: Run ingestion
+        run: |
+          python -m ingestion.reddit_ingest
+
+      - name: Run enrichment
+        run: |
+          python -c "from ingestion.enrichment_job import run_enrichment; run_enrichment()"
+
+      - name: Run dbt source freshness
+        working-directory: dbt/painpulse
+        run: |
+          dbt source freshness --no-partial-parse
+
+      - name: Run dbt build
+        working-directory: dbt/painpulse
+        run: |
+          dbt build --no-partial-parse
+
+      - name: Upload dbt artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-artifacts
+          path: |
+            dbt/painpulse/target
+            dbt/painpulse/logs
