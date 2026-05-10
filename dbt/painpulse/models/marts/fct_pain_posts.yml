@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: fct_pain_posts
+    description: Final fact table of matched pain-related Reddit posts for downstream consumption.
+    columns:
+      - name: post_id
+        description: Primary key for the Reddit post.
+        tests:
+          - not_null
+          - unique
+
+      - name: subreddit
+        description: Source subreddit for the post.
+        tests:
+          - not_null
+
+      - name: title
+        description: Reddit post title.
+        tests:
+          - not_null
+
+      - name: created_at_utc
+        description: Post creation timestamp in UTC.
+        tests:
+          - not_null
+
+      - name: matches_pain_pattern
+        description: Indicates whether the post matched the pain-related criteria.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true]
+                quote: false
+
+      - name: pain_relevance_score
+        description: Composite score used to rank matched posts.
+        tests:
+          - not_null
+
+      - name: pain_post_rank
+        description: Deterministic rank ordered by relevance score and recency.
+        tests:
+          - not_null
+
+      - name: rank_bucket
+        description: Rank band used for downstream segmentation.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['top_10', 'top_50', 'top_100', 'long_tail']
