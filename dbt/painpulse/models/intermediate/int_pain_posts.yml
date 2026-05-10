@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: int_pain_posts_filtered
+    description: Pain-related Reddit post candidates filtered from the enriched staging model.
+    columns:
+      - name: post_id
+        description: Primary key for the Reddit post.
+        tests:
+          - not_null
+          - unique
+
+      - name: matches_pain_pattern
+        description: Boolean flag indicating the post qualified as a pain-related candidate.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true]
+                quote: false
+
+      - name: subreddit
+        description: Source subreddit for the post.
+        tests:
+          - not_null
+
+      - name: title
+        description: Reddit post title.
+        tests:
+          - not_null
+
+      - name: created_at_utc
+        description: Post creation timestamp in UTC.
+        tests:
+          - not_null
+
+  - name: int_pain_posts_scored
+    description: Pain-related Reddit post candidates with deterministic relevance scoring fields.
+    columns:
+      - name: post_id
+        description: Primary key for the Reddit post.
+        tests:
+          - not_null
+          - unique
+
+      - name: matches_pain_pattern
+        description: Boolean flag indicating the post qualified as a pain-related candidate.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true]
+                quote: false
+
+      - name: pain_relevance_score
+        description: Composite score used to rank pain-related posts.
+        tests:
+          - not_null
+
+      - name: normalized_score
+        description: Non-negative normalized post score.
+        tests:
+          - not_null
+
+      - name: normalized_num_comments
+        description: Non-negative normalized comment count.
+        tests:
+          - not_null
+
+      - name: negative_sentiment_strength
+        description: Absolute strength of negative sentiment, floored at zero.
+        tests:
+          - not_null
+
+      - name: normalized_engagement_score
+        description: Non-negative normalized engagement score.
+        tests:
+          - not_null
