@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: canonical_opportunities
+    description: Canonicalized opportunity groups derived from matched pain posts.
+    columns:
+      - name: opportunity_id
+        tests:
+          - not_null
+          - unique
+      - name: canonical_title
+        tests:
+          - not_null
+      - name: representative_post_id
+        tests:
+          - not_null
+      - name: first_seen_at
+        tests:
+          - not_null
+      - name: last_seen_at
+        tests:
+          - not_null
+
+  - name: opportunity_rankings
+    description: Ranked opportunity dataset with versioned scoring outputs.
+    columns:
+      - name: opportunity_id
+        tests:
+          - not_null
+          - unique
+      - name: canonical_title
+        tests:
+          - not_null
+      - name: opportunity_score
+        tests:
+          - not_null
+      - name: tier
+        tests:
+          - not_null
+      - name: scoring_version
+        tests:
+          - not_null
