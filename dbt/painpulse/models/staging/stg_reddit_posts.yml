@@ -5,6 +5,11 @@ sources:
     schema: public   # or whatever schema your tables are in
     tables:
       - name: reddit_raw_posts
+        loaded_at_field: ingested_at
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+      
       - name: pattern_config
       - name: reddit_post_enrichment
 
