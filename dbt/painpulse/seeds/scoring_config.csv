@@ -1,0 +1,2 @@
+config_version,frequency_weight,engagement_weight,pain_weight,tier1_threshold,tier2_threshold
+v1,0.5,0.3,0.2,0.75,0.45
