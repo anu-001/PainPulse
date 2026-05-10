@@ -2,15 +2,44 @@ version: 2
 
 models:
   - name: matched_pain_posts
-    description: "Subset of posts that are likely genuine pain points."
+    description: Ranked set of matched pain-related Reddit posts for downstream analytics and consumption.
     columns:
       - name: post_id
+        description: Primary key for the Reddit post.
         tests:
           - not_null
           - unique
-      - name: subreddit
+
+      - name: pain_post_rank
+        description: Deterministic rank ordered by relevance score and recency.
         tests:
           - not_null
+
+      - name: matches_pain_pattern
+        description: Boolean flag indicating the post qualified as a pain-related candidate.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true]
+                quote: false
+
+      - name: pain_relevance_score
+        description: Composite score used to rank pain-related posts.
+        tests:
+          - not_null
+
+      - name: subreddit
+        description: Source subreddit for the post.
+        tests:
+          - not_null
+
       - name: title
+        description: Reddit post title.
+        tests:
+          - not_null
+
+      - name: created_at_utc
+        description: Post creation timestamp in UTC.
         tests:
           - not_null
