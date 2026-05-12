@@ -1,0 +1,15 @@
+FROM apache/superset:latest
+USER root
+
+# Ensure system build deps are present if needed, then install psycopg2-binary
+RUN set -eux \
+    && if command -v apt-get >/dev/null 2>&1; then \
+    apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev && rm -rf /var/lib/apt/lists/*; \
+    fi \
+    && if [ -x /app/.venv/bin/pip ]; then \
+    /app/.venv/bin/pip install --no-cache-dir psycopg2-binary; \
+    else \
+    pip install --no-cache-dir psycopg2-binary; \
+    fi
+
+USER superset

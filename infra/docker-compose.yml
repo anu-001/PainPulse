@@ -40,7 +40,9 @@ services:
       - "8080:8080"
 
   superset:
-    image: apache/superset:latest
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.superset
     container_name: pp-superset
     restart: unless-stopped
     depends_on:

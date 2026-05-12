@@ -1,7 +1,7 @@
 with daily as (
 
     select
-        mp.opportunity_id,
+        co.opportunity_id,
         co.canonical_title,
         date_trunc('day', fp.created_at_utc) as activity_date,
         count(*) as post_count,
@@ -11,7 +11,7 @@ with daily as (
     join {{ ref('fct_pain_posts') }} fp
       on mp.post_id = fp.post_id
     left join {{ ref('canonical_opportunities') }} co
-      on mp.opportunity_id = co.opportunity_id
+      on co.opportunity_id = co.opportunity_id
     group by 1, 2, 3
 
 )
