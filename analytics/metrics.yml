@@ -1,0 +1,177 @@
+version: 1
+
+metrics:
+  # 1. Core volume metric
+  - name: opportunities_total
+    label: "Total Opportunities"
+    model: ref('rpt_opportunity_trends')   
+    description: >
+      Count of distinct opportunities detected in Reddit pain posts for the selected time period.
+    type: simple
+    type_params:
+      expr: "opportunity_id"               
+      agg: count_distinct
+    filter:
+      - field: is_valid                    
+        operator: "eq"
+        value: true
+    timestamp: event_date                   
+    time_grains: ["day", "week", "month"]
+    tags: ["painpulse", "executive_kpi", "volume"]
+
+  # 2. Weekly opportunity growth %
+  - name: opportunities_weekly_growth_pct
+    label: "Weekly Opportunity Growth %"
+    model: ref('rpt_opportunity_trends')
+    description: >
+      Week-over-week percentage change in total opportunities, based on the opportunities_total metric.
+    type: derived
+    type_params:
+      metrics:
+        - name: opportunities_total
+      window:
+        grain: week
+        trailing: 0
+        offset: 0
+      expr: "pct_change(opportunities_total)"
+    timestamp: event_date
+    time_grains: ["week"]
+    tags: ["painpulse", "executive_kpi", "growth"]
+
+  # 3. Top opportunity score in the period
+  - name: top_opportunity_score
+    label: "Top Opportunity Score"
+    model: ref('rpt_top_opportunities')
+    description: >
+      Maximum opportunity score among all opportunities in the selected time period.
+    type: simple
+    type_params:
+      expr: "opportunity_score"            
+      agg: max
+    timestamp: snapshot_date                
+    time_grains: ["day", "week", "month"]
+    tags: ["painpulse", "executive_kpi", "severity"]
+
+  # 4. Average opportunity score
+  - name: avg_opportunity_score
+    label: "Average Opportunity Score"
+    model: ref('rpt_top_opportunities')
+    description: >
+      Average score across all opportunities, filtered by the selected theme, source, and time range.
+    type: simple
+    type_params:
+      expr: "opportunity_score"
+      agg: avg
+    timestamp: snapshot_date
+    time_grains: ["day", "week", "month"]
+    tags: ["painpulse", "analyst", "severity"]
+
+  # 5. Pipeline health index
+  - name: pipeline_health_index
+    label: "Pipeline Health Index"
+    model: ref('rpt_ops_pipeline_health')
+    description: >
+      Composite index (0–100) that blends recency, volume, and data quality for the PainPulse pipeline.
+    type: simple
+    type_params:
+      expr: "health_score"                  # TODO: confirm column name
+      agg: avg
+    timestamp: as_of_date                   # TODO: adjust to your date column
+    time_grains: ["day"]
+    tags: ["painpulse", "ops", "health"]
+
+  # 6. Data freshness (hours since last successful run)
+  - name: hours_since_last_run
+    label: "Hours Since Last Successful Run"
+    model: ref('rpt_ops_pipeline_health')
+    description: >
+      Number of hours since the last successful end-to-end PainPulse pipeline execution.
+    type: simple
+    type_params:
+      expr: "hours_since_last_run"          # TODO: materialize this in rpt_ops_pipeline_health
+      agg: max
+    timestamp: as_of_date
+    time_grains: ["day"]
+    tags: ["painpulse", "ops", "freshness"]
+
+  # 7. High-severity opportunities share
+  - name: high_severity_opportunity_share
+    label: "High-Severity Opportunity Share %"
+    model: ref('rpt_opportunity_trends')
+    description: >
+      Percentage of opportunities classified as high severity in the selected period.
+    type: ratio
+    type_params:
+      numerator:
+        expr: "opportunity_id"
+        agg: count_distinct
+        filter:
+          - field: severity_band            # TODO: confirm name (e.g. 'severity_bucket')
+            operator: "eq"
+            value: "high"
+      denominator:
+        expr: "opportunity_id"
+        agg: count_distinct
+    timestamp: event_date
+    time_grains: ["day", "week", "month"]
+    tags: ["painpulse", "severity", "mix"]
+
+  # 8. Theme mix – percentage of volume by theme
+  - name: theme_share_pct
+    label: "Theme Share %"
+    model: ref('rpt_opportunity_trends')
+    description: >
+      Share of total opportunities for each theme within the selected time period.
+    type: ratio
+    type_params:
+      numerator:
+        expr: "opportunity_id"
+        agg: count_distinct
+      denominator:
+        expr: "opportunity_id"
+        agg: count_distinct
+    timestamp: event_date
+    time_grains: ["week", "month"]
+    dimensions: ["theme"]                   
+    tags: ["painpulse", "mix", "theme"]
+
+  # 9. Source (subreddit) mix
+  - name: source_share_pct
+    label: "Source Share %"
+    model: ref('rpt_opportunity_trends')
+    description: >
+      Share of total opportunities by source community / subreddit.
+    type: ratio
+    type_params:
+      numerator:
+        expr: "opportunity_id"
+        agg: count_distinct
+      denominator:
+        expr: "opportunity_id"
+        agg: count_distinct
+    timestamp: event_date
+    time_grains: ["week", "month"]
+    dimensions: ["source_subreddit"]        
+    tags: ["painpulse", "mix", "source"]
+
+  # 10. Valid opportunity coverage
+  - name: valid_opportunity_coverage_pct
+    label: "Valid Opportunity Coverage %"
+    model: ref('rpt_opportunity_trends')
+    description: >
+      Share of all scored pain posts that are successfully mapped to a valid opportunity.
+    type: ratio
+    type_params:
+      numerator:
+        expr: "opportunity_id"
+        agg: count_distinct
+        filter:
+          - field: is_valid
+            operator: "eq"
+            value: true
+      denominator:
+        expr: "pain_post_id"                
+        agg: count_distinct
+    timestamp: event_date
+    time_grains: ["week", "month"]
+    tags: ["painpulse", "coverage", "quality"]

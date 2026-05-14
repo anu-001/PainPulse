@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: rpt_top_opportunities
+    description: Dashboard-ready opportunity ranking view for Superset.
+    columns:
+      - name: opportunity_id
+        tests: [not_null]
+      - name: canonical_title
+        tests: [not_null]
+      - name: opportunity_score
+        tests: [not_null]
+
+  - name: rpt_opportunity_post_drilldown
+    description: Representative post drill-down dataset for each opportunity.
+    columns:
+      - name: opportunity_id
+        tests: [not_null]
+      - name: post_id
+        tests: [not_null]
+
+  - name: rpt_opportunity_trends
+    description: Daily trend metrics for canonical opportunities.
+    columns:
+      - name: opportunity_id
+        tests: [not_null]
+      - name: activity_date
+        tests: [not_null]
+
+  - name: rpt_ops_pipeline_health
+    description: Lightweight operational monitoring dataset for dashboard health checks.
